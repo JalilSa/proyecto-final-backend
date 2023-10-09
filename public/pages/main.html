@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        #products div, #cart div {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 5px;
+        }
+        button {
+            margin-top: 10px;
+        }
+    </style>
+    <title>Tienda</title>
+</head>
+
+<body>
+    <h1>Bienvenido a la tienda</h1>
+
+    <!-- Sección de productos -->
+    <section id="products">
+        <!-- Los productos se mostrarán aquí desde el script main.js -->
+    </section>
+
+    <!-- Sección del carrito -->
+    <section id="cart">
+        <h2>Carrito</h2>
+        <!-- Aquí se mostrarán los ítems del carrito -->
+        <div id="cart-items"></div>
+        <h3>Total: $<span id="cart-total">0</span></h3>
+        <button onclick="proceedToCheckout('yourCustomerEmail@example.com')">Comprar</button>
+    </section>
+
+    <script src="/scripts/main.js"></script>
+</body>
+
+</html>

@@ -7,15 +7,12 @@ const __dirname = path.dirname(__filename);
 
 class CartManager {
   constructor(cartPath, productManager) {
-    this.cartPath = path.resolve(__dirname, cartPath); // Utilizamos path.resolve para asegurar la ruta absoluta.
+    this.cartPath = path.resolve(__dirname, '../public', cartPath); // Utilizamos path.resolve para asegurar la ruta absoluta y moverlo a la carpeta /public
     this.productManager = productManager;
     this.cart = this.readCart();
     console.log(`CartManager conectado a ${this.cartPath}. Actualmente tiene ${this.cart.length} ítems.`);
   }
-   getCart() {
-    return this.cart;
-  }
-  
+
   readCart() {
     try {
       if (!fs.existsSync(this.cartPath)) {

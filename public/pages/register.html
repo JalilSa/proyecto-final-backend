@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro y Login</title>
+</head>
+<body>
+    <h1>Registro y Login</h1>
+
+    <section id="register">
+        <h2>Registro</h2>
+        <input type="text" id="name" placeholder="Nombre">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Contraseña">
+        <label><input type="checkbox" id="premium"> Usuario Premium</label>
+        <button onclick="registerUser()">Registrar</button>
+    </section>
+
+    <section id="login">
+        <h2>Login</h2>
+        <input type="email" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPassword" placeholder="Contraseña">
+        <button onclick="loginUser()">Login</button>
+    </section>
+
+    <script src="/scripts/auth.js"></script>
+</body>
+</html>
