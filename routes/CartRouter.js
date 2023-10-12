@@ -14,8 +14,6 @@ cartRoutes.post('/checkout', async (req, res) => {
 });
 
 cartRoutes.post('/add', (req, res) => {
-  // Aquí, agregarías el producto al carrito usando el CartManager
-  // Por ejemplo:
   const productId = req.body.productId;
   cartManager.addItem({ id: productId, quantity: 1 });
   res.json({ success: true });

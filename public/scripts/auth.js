@@ -16,9 +16,9 @@ async function registerUser() {
 
         const data = await response.json();
 
-        if (response.ok) { // Verifica si el estado HTTP es 2xx (exitoso)
+        if (response.ok) {
             alert('Registrado con éxito!');
-            // Aquí puedes hacer una redirección o mostrar algún mensaje.
+
         } else {
             alert(data.message || 'Error al registrar');
         }
@@ -43,10 +43,10 @@ async function loginUser() {
 
         const data = await response.json();
 
-        if (response.ok) { // Verifica si el estado HTTP es 2xx (exitoso)
-            // Guarda el token y el email en el local storage para futuras peticiones.
+        if (response.ok) {
+
             localStorage.setItem('token', data.token);
-            localStorage.setItem('userEmail', email); // Almacena el email en el localStorage
+            localStorage.setItem('userEmail', email);
             window.location.href = "/pages/main.html";
         } else {
             alert(data.message || 'Error al hacer login');
