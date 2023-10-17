@@ -5,6 +5,7 @@ export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await UserService.getUserByEmail(email);
+        const currentDate = new Date();
 
         if (!user) {
             return res.status(401).json({ message: 'Email o contraseña incorrectos.' });
@@ -14,7 +15,8 @@ export const login = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Email o contraseña incorrectos.' });
         }
-
+        //Manegar last login
+        await UserDAO.updateLastLogin(user._id, currentDate);
         // Generar un token para el usuario
         const token = TokenService.generateToken(user);
         res.json({

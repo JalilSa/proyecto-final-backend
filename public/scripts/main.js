@@ -143,13 +143,37 @@ document.getElementById('accessEditorButton').addEventListener('click', async ()
         console.log("Después de hacer la petición fetch");
     } catch (error) {
         console.error('Error:', error);
-        alert('Acceso denegado'); // Muestra una notificación de "acceso denegado"
+        alert('Acceso denegado');
     }
 });
+async function checkIfAdminAndLoadButton() {
+    try {
+        const response = await fetch('/api/isAdmin', {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            displayUserEditorButton();
+        }
+    } catch (error) {
+        console.error('Error al verificar el rol del usuario:', error);
+    }
+}
+
+function displayUserEditorButton() {
+    const container = document.getElementById('userEditorButtonContainer');
+    const btn = document.createElement('button');
+    btn.innerText = 'Ir al Editor de Usuarios';
+    btn.onclick = () => window.location.href = 'usereditor.html';
+    container.appendChild(btn);
+}
 
 // Llama a las funciones al cargar la página
 displayProducts();
 displayCart();
-
+checkIfAdminAndLoadButton();
 
 

@@ -10,17 +10,18 @@ import productRouter from './routes/productRoutes.js';
 import cors from 'cors';
 import passport from 'passport';
 import session from 'express-session';
+import { createAdminUser, createDummyUsers } from './services/UserService.js';
 
 // Configuración de dotenv 
 dotenv.config();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 
 //config de app
 const app = express();
 connectDB();
 app.use(session({
-  secret: 'tu_clave_secreta',
+  secret: process.env.SECRET_KEY,
   resave: false,
   saveUninitialized: false
 }));
@@ -48,6 +49,9 @@ passport.deserializeUser((id, done) => {
 });
 
 
+createAdminUser();
+createDummyUsers();
+
 // Rutas
 app.use('/cart', cartRoutes);
 app.use('/payment', paymentRoutes);
@@ -59,5 +63,6 @@ app.use('/', productRouter);
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
 
 export default app;

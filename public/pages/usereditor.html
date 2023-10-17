@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Usuarios</title>
+</head>
+<body>
+    <h1>Editor de Usuarios</h1>
+    <button onclick="loadUsers()">Cargar Usuarios</button>
+    <button onclick="deleteInactiveUsers()">Eliminar Usuarios Inactivos</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="usersTableBody"></tbody>
+    </table>
+
+    <script src="../scripts/usereditor.js"></script>
+</body>
+</html>
