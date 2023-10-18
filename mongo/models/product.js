@@ -8,9 +8,9 @@ const ProductSchema = new mongoose.Schema({
   code: String,
   stock: Number,
   owner: { 
-    type: mongoose.Schema.Types.ObjectId, 
+    type: String, 
     ref: 'users', 
-    default: null 
+    default: "admin"
   }
 });
 

@@ -13,10 +13,27 @@ cartRoutes.post('/checkout', async (req, res) => {
   }
 });
 
+// cartRoutes.post('/add', (req, res) => {
+//   const productId = req.body.productId;
+//   cartManager.addItem({ id: productId, quantity: 1 });
+//   res.json({ success: true });
+// });
+
 cartRoutes.post('/add', (req, res) => {
   const productId = req.body.productId;
-  cartManager.addItem({ id: productId, quantity: 1 });
-  res.json({ success: true });
+  
+  console.log(`Producto con ID: ${productId} recibido exitosamente.`);
+  
+  res.json({ message: `Producto con ID: ${productId} recibido en el servidor.` });
+});
+
+cartRoutes.get('/', async (req, res) => {
+  try {
+      const cartItems = await cartManager.getCartItems(); // Asume que tienes una función así en tu CartManager
+      res.json(cartItems);
+  } catch (error) {
+      res.status(500).json({ message: 'Error al obtener los artículos del carrito' });
+  }
 });
 
 

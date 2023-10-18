@@ -1,57 +1,75 @@
-const products = [
-    { id: 1, name: "Producto 1", price: 100 },
-    { id: 2, name: "Producto 2", price: 200 },
-    // ... puedes agregar más productos si lo deseas
-];
+
+
 const userEmail = localStorage.getItem('userEmail');
 
-       
+let products = [];
 
-function displayProducts() {
-    const productsContainer = document.getElementById('products');
-    products.forEach(product => {
-        const productDiv = document.createElement('div');
-        productDiv.innerHTML = `
-            <h3>${product.name}</h3>
-            <p>Precio: $${product.price}</p>
-            <button onclick="addToCart(${product.id})">Agregar al carrito</button>
-        `;
-        productsContainer.appendChild(productDiv);
-    });
-}
-
-
-
-
-
-async function addToCart(productId) {
+async function fetchProducts() {
     try {
-        const response = await fetch('/cart/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({ productId })
-        });
-
-        const data = await response.json();
+        const response = await fetch('/api/products');
         
-        if (response.ok) {
-            if (data.success) {
-                alert(`Producto con ID ${productId} añadido al carrito.`);
-                displayCart();  // Actualizar la vista del carrito.
-            } else {
-                // Mostrar el mensaje de error del servidor, si está disponible.
-                alert(data.message || 'Hubo un problema al añadir el producto al carrito.');
-            }
-        } else {
-            throw new Error(data.message || 'Respuesta no exitosa del servidor');
+        if (!response.ok) {
+            throw new Error('Error al obtener los productos');
         }
+
+        products = await response.json();
     } catch (error) {
-        alert(`Error al comunicarse con el servidor: ${error.message}`);
+        console.error('Error al obtener productos:', error);
     }
 }
+
+async function displayProducts() {
+    const productsContainer = document.getElementById('products');
+    productsContainer.innerHTML = '';
+
+    try {
+        await fetchProducts();
+
+        products.forEach(product => {
+            const productDiv = document.createElement('div');
+            productDiv.innerHTML = `
+                <h3>${product.title}</h3>  
+                <p>Precio: $${product.price}</p>
+                <button onclick="addToCart('${product._id}')">Agregar al carrito</button>
+            `;
+            productsContainer.appendChild(productDiv);
+        });
+    } catch (error) {
+        console.error('Error al mostrar productos:', error);
+    }
+}
+
+
+
+function addToCart(productId) {
+    // Intenta obtener el carrito del localStorage
+    const cartString = localStorage.getItem('cart');
+    
+    // Convierte el carrito a un objeto (o usa un array vacío si el carrito no existe)
+    const cart = cartString ? JSON.parse(cartString) : [];
+
+    // Busca el producto en el carrito
+    const cartItem = cart.find(item => item.id === productId);
+
+    if (cartItem) {
+        // Si el producto ya está en el carrito, incrementa la cantidad
+        cartItem.quantity++;
+    } else {
+        // Si el producto no está en el carrito, agrégalo con cantidad 1
+        cart.push({ id: productId, quantity: 1 });
+    }
+
+    // Guarda el carrito actualizado en localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    alert(`Producto con ID ${productId} añadido al carrito.`);
+    displayCart();
+}
+
+
+
+
+
 
 async function proceedToCheckout(userEmail) {
     try {
@@ -86,30 +104,25 @@ async function displayCart() {
     const cartContainer = document.getElementById('cart-items');
     const cartTotalElem = document.getElementById('cart-total');
 
-    let cart;
-    try {
-        // Nota: Asegúrate de que esta ruta apunte al lugar correcto de tu archivo cart.json.
-        const response = await fetch('../cart.json');  
-        if (response.ok) {
-            cart = await response.json();
-        } else {
-            throw new Error('Respuesta no exitosa al obtener el carrito');
-        }
-    } catch (error) {
-        alert('Error al obtener el carrito.');
-        return;
-    }
+    // Obtiene los productos antes de procesar el carrito
+    await fetchProducts();
+
+    // Intenta obtener el carrito del localStorage
+    const cartString = localStorage.getItem('cart');
+
+    // Convierte el carrito a un objeto (o usa un array vacío si el carrito no existe)
+    const cart = cartString ? JSON.parse(cartString) : [];
 
     let total = 0;
     cartContainer.innerHTML = ''; 
 
     cart.forEach(item => {
         const itemDiv = document.createElement('div');
-        const product = products.find(p => p.id === item.id);
+        const product = products.find(p => p._id === item.id);
         const itemPrice = product ? product.price * item.quantity : 0;
 
         itemDiv.innerHTML = `
-            <h4>${product ? product.name : 'Producto no encontrado'}</h4>
+            <h4>${product ? product.title : 'Producto no encontrado'}</h4> <!-- Cambiamos name por title -->
             <p>Cantidad: ${item.quantity}</p>
             <p>Precio: $${itemPrice}</p>
         `;
@@ -118,8 +131,11 @@ async function displayCart() {
         total += itemPrice;
     });
 
-    cartTotalElem.textContent = total;
+    cartTotalElem.textContent = `Total: $${total}`;  // Agregamos el prefijo "Total: $" para que sea más claro el propósito de este elemento.
 }
+
+
+
 document.getElementById('accessEditorButton').addEventListener('click', async () => {
     console.log("Inicio de la función checkUserRoleAndLoadButton");
     
