@@ -1,8 +1,9 @@
 
 
 const userEmail = localStorage.getItem('userEmail');
-
+const stripe = Stripe('pk_test_51Ny0irLDEwk8ODfEtWfVcKbQRsJyAxQ97XAahcKcfB8yc3oJNNOisbBIpbYFQ3MWuG7UIQ3c1Zj4XjDTIGOyOmQp00NwgVc9dE');
 let products = [];
+localStorage.setItem('cart', JSON.stringify([]));
 
 async function fetchProducts() {
     try {
@@ -71,34 +72,44 @@ function addToCart(productId) {
 
 
 
-async function proceedToCheckout(userEmail) {
+async function proceedToCheckout() {
+    // Obtiene el carrito desde localStorage
+    const cartString = localStorage.getItem('cart');
+    const cart = cartString ? JSON.parse(cartString) : [];
+
     try {
-        const response = await fetch('/cart/checkout', {
+        const response = await fetch('/payment/checkout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ userEmail })
+            body: JSON.stringify({ cart })
         });
 
         const data = await response.json();
-
-        if (response.ok) {
-            if (data.sessionId) {
-                alert('Procediendo al checkout...');
-                // Aquí podrías redireccionar al usuario a la página de pago de Stripe usando el sessionId.
-            } else {
-                // Mostrar el mensaje de error del servidor, si está disponible.
-                alert(data.message || 'Hubo un problema al procesar el checkout.');
-            }
+        
+        if(data.success) {
+            // Redirigir al cliente a la página de pago de Stripe
+            stripe.redirectToCheckout({
+                sessionId: data.sessionId
+            }).then((result) => {
+                if (result.error) {
+                    // Muestra el error al usuario si hay uno
+                    alert(result.error.message);
+                }
+            });
         } else {
-            throw new Error(data.message || 'Respuesta no exitosa del servidor');
+            // Manejar errores
+            console.error('Error al procesar el pago:', data.error);
+            alert('Hubo un problema al procesar tu pago. Por favor intenta de nuevo.');
         }
-    } catch (error) {
-        alert(`Error al comunicarse con el servidor: ${error.message}`);
+    } catch(error) {
+        console.error('Error:', error);
     }
 }
+
+
 
 async function displayCart() {
     const cartContainer = document.getElementById('cart-items');

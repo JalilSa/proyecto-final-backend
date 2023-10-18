@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
+const MONGODB_URL = process.env.MONGO_URL||"mongodb://127.0.0.1:27017" ;
 
 export const connectDB = async () => {
   try {
-    await mongoose.connect('mongodb://127.0.0.1:27017', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Conectado a MongoDB'))
+    .catch(error => console.error('Error al conectar a MongoDB:', error));
+  
     
     // Una vez que la conexión esté abierta, intentamos eliminar el índice
     mongoose.connection.once('open', function() {
