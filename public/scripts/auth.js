@@ -44,9 +44,9 @@ async function loginUser() {
         const data = await response.json();
 
         if (response.ok) {
-
             localStorage.setItem('token', data.token);
             localStorage.setItem('userEmail', email);
+            localStorage.setItem('userId', data.userId); 
             window.location.href = "/pages/main.html";
         } else {
             alert(data.message || 'Error al hacer login');
@@ -56,3 +56,33 @@ async function loginUser() {
         alert('Hubo un error al intentar iniciar sesión. Por favor, intenta de nuevo.');
     }
 }
+
+function checkUserLoggedIn() {
+    const token = localStorage.getItem('token');
+    if (token) {
+
+        document.getElementById('register').style.display = 'none';
+        document.getElementById('login').style.display = 'none';
+
+        document.getElementById('goToMain').style.display = 'block';
+        document.getElementById('logoutSection').style.display = 'block';
+    }
+}
+
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userId');
+
+    window.location.reload();
+}
+
+
+function goToMainPage() {
+    window.location.href = "/pages/main.html";
+}
+
+window.onload = checkUserLoggedIn;
+
+

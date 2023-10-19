@@ -30,13 +30,17 @@ userRouter.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Email o contraseña incorrectos.' });
         }
 
-        const token = TokenService.generateToken({ id: user._id, role: user.role });
-        res.status(200).json({ token });
+        const token = TokenService.generateToken({ _id: user._id, role: user.role });
+
+
+        // Modificar la respuesta para enviar el token y el userId
+        res.status(200).json({ token, userId: user._id.toString() });
 
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
+
 
 userRouter.get('/getusers', authenticate, isAdmin, async (req, res) => {
     try {
@@ -101,4 +105,16 @@ userRouter.put('/:userId/role', authenticate, isAdmin, async (req, res) => {
     }
 });
 
+
+userRouter.get('/adminId', async (req, res) => {
+    try {
+        const admin = await User.findOne({ role: 'admin' }); // Busca el primer administrador en la base de datos
+        if (!admin) {
+            return res.status(404).json({ message: 'Administrador no encontrado.' });
+        }
+        res.status(200).json({ adminId: admin._id });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 export default userRouter;

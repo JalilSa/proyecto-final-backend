@@ -1,10 +1,38 @@
 
 
 const userEmail = localStorage.getItem('userEmail');
-const stripe = Stripe('pk_test_51Ny0irLDEwk8ODfEtWfVcKbQRsJyAxQ97XAahcKcfB8yc3oJNNOisbBIpbYFQ3MWuG7UIQ3c1Zj4XjDTIGOyOmQp00NwgVc9dE');
+const stripe = Stripe('pk_test_51Ny0irLDEwk8ODfEtWfVcKbQRsJyAxQ97XAahcKcfB8yc3oJNNOisbBIpbYFQ3MWuG7UIQ3c1Zj4XjDTIGOyOmQp00NwgVc9dE'); //clave publicable
 let products = [];
+
+///////////////////////////////////////////////////////////////////////
+//AUTH/////////////////////////////////////////////////////////////////
+async function isCurrentUserAdmin() {
+    try {
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch('/api/isAdmin', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.message === 'Usuario es administrador') {
+                return true;
+            }
+        }
+        return false;
+    } catch (error) {
+        console.error('Error al verificar si el usuario es administrador:', error);
+        return false;
+    }
+}
 localStorage.setItem('cart', JSON.stringify([]));
 
+///////////////////////////////////////////////////////////////////////
+//PRODUCTS/////////////////////////////////////////////////////////////////
 async function fetchProducts() {
     try {
         const response = await fetch('/api/products');
@@ -16,6 +44,21 @@ async function fetchProducts() {
         products = await response.json();
     } catch (error) {
         console.error('Error al obtener productos:', error);
+    }
+}
+async function getProductDetails(productId) {
+    try {
+        const response = await fetch(`/api/products/${productId}`);
+
+        if (!response.ok) {
+            throw new Error('Error al obtener los detalles del producto.');
+        }
+
+        const productData = await response.json();
+        return productData;
+    } catch (error) {
+        console.error('Error al obtener los detalles del producto:', error);
+        return null;
     }
 }
 
@@ -31,7 +74,8 @@ async function displayProducts() {
             productDiv.innerHTML = `
                 <h3>${product.title}</h3>  
                 <p>Precio: $${product.price}</p>
-                <button onclick="addToCart('${product._id}')">Agregar al carrito</button>
+                <button onclick="addToCart('${product._id}', '${product.owner}')">Agregar al carrito</button>
+
             `;
             productsContainer.appendChild(productDiv);
         });
@@ -41,15 +85,35 @@ async function displayProducts() {
 }
 
 
-
-function addToCart(productId) {
-    // Intenta obtener el carrito del localStorage
-    const cartString = localStorage.getItem('cart');
+async function addToCart(productId) {
+    // Verifica si el usuario actual es administrador
+    const isAdmin = await isCurrentUserAdmin();
     
-    // Convierte el carrito a un objeto (o usa un array vacío si el carrito no existe)
-    const cart = cartString ? JSON.parse(cartString) : [];
+    if (isAdmin) {
+        alert('El administrador no puede realizar compras.');
+        return; 
+    }
 
-    // Busca el producto en el carrito
+    // Obtén los detalles del producto 
+    const productData = await getProductDetails(productId); 
+
+    if (!productData) {
+        alert('Error al obtener los detalles del producto.');
+        return;
+    }
+
+    const currentUserId = localStorage.getItem('userId');
+    console.log('currentUserId:', currentUserId);
+    console.log('productData.owner:', productData.owner);
+    
+    if (productData.owner === currentUserId) {
+        alert('No puedes agregar tu propio producto al carrito.');
+        return;
+    }
+    
+    const cartString = localStorage.getItem('cart');
+
+    const cart = cartString ? JSON.parse(cartString) : [];
     const cartItem = cart.find(item => item.id === productId);
 
     if (cartItem) {

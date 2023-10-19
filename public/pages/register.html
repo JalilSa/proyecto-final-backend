@@ -23,7 +23,15 @@
         <input type="password" id="loginPassword" placeholder="Contraseña">
         <button onclick="loginUser()">Login</button>
     </section>
+    <section id="goToMain" style="display: none;">
+        <h2>¡Bienvenido de nuevo!</h2>
+        <button onclick="goToMainPage()">Ir a la página principal</button>
+    </section>
 
+    <section id="logoutSection" style="display: none;">
+        <button onclick="logout()">Cerrar sesión</button>
+    </section>
+    
     <script src="/scripts/auth.js"></script>
 </body>
 </html>
