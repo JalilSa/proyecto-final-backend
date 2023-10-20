@@ -44,9 +44,10 @@ paymentRoutes.post('/checkout', async (req, res) => {
             payment_method_types: ['card'],
             line_items: line_items,
             mode: 'payment',
-            success_url: `http://localhost:${PORT}/pages/success.html`,
-            cancel_url: `http://localhost:${PORT}/pages/cancel.html`,
+            success_url: process.env.SUCCESS_URL || `http://localhost:${PORT}/pages/success.html`,
+            cancel_url: process.env.CANCEL_URL || `http://localhost:${PORT}/pages/cancel.html`,
         });
+        
 
         res.json({ success: true, sessionId: session.id });
     } catch (error) {
