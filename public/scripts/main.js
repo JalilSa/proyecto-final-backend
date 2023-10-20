@@ -182,31 +182,37 @@ async function displayCart() {
     // Obtiene los productos antes de procesar el carrito
     await fetchProducts();
 
-    // Intenta obtener el carrito del localStorage
     const cartString = localStorage.getItem('cart');
-
-    // Convierte el carrito a un objeto (o usa un array vacío si el carrito no existe)
     const cart = cartString ? JSON.parse(cartString) : [];
-
     let total = 0;
+
     cartContainer.innerHTML = ''; 
 
-    cart.forEach(item => {
+    cart.forEach((item, index) => {
         const itemDiv = document.createElement('div');
         const product = products.find(p => p._id === item.id);
         const itemPrice = product ? product.price * item.quantity : 0;
 
         itemDiv.innerHTML = `
-            <h4>${product ? product.title : 'Producto no encontrado'}</h4> <!-- Cambiamos name por title -->
+            <h4>${product ? product.title : 'Producto no encontrado'}</h4>
             <p>Cantidad: ${item.quantity}</p>
             <p>Precio: $${itemPrice}</p>
+            <button class="remove-item">Eliminar</button>
         `;
+
         cartContainer.appendChild(itemDiv);
+
+        // Agrega un event listener al botón "Eliminar"
+        itemDiv.querySelector(".remove-item").addEventListener("click", function() {
+            cart.splice(index, 1); // elimina el artículo del carrito
+            localStorage.setItem('cart', JSON.stringify(cart)); // actualiza el carrito en localStorage
+            displayCart(); // refresca la vista
+        });
 
         total += itemPrice;
     });
 
-    cartTotalElem.textContent = `Total: $${total}`;  // Agregamos el prefijo "Total: $" para que sea más claro el propósito de este elemento.
+    cartTotalElem.textContent = `Total: $${total}`;
 }
 
 
