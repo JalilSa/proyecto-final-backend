@@ -2,8 +2,6 @@ import express from 'express';
 import * as UserService from '../services/UserService.js';
 import * as TokenService from '../services/TokenService.js';
 import { authenticate, isAdmin } from '../middlewares/authMiddleware.js';
-import { getAllUsers, deleteUsersByLastLogin, deleteUserById, flipRole, getUsersToBeDeleted} from '../mongo/DAO/UserDAO.js';
-import { sendEmail } from '../managers/mailManager.js';
 const userRouter = express.Router();
 
 userRouter.post('/register', async (req, res) => {
@@ -44,14 +42,13 @@ userRouter.post('/login', async (req, res) => {
 
 userRouter.get('/getusers', authenticate, isAdmin, async (req, res) => {
     try {
-        const users = await getAllUsers();
-        console.log("Usuarios recuperados:");
+        const users = await UserService.getAllServiceUsers();
         res.status(200).json(users);
     } catch (error) {
-        console.error("Error al recuperar usuarios:", error);
-        res.status(500).json({ message: "Error al recuperar usuarios" });
+        res.status(500).json({ message: error.message });
     }
-})
+});
+
 
 
 
@@ -59,19 +56,11 @@ userRouter.get('/getusers', authenticate, isAdmin, async (req, res) => {
 userRouter.delete('/deleteusers', authenticate, async (req, res) => {
     try {
         const currentDate = new Date();
-        const thresholdDate = new Date(currentDate - 2 * 24 * 60 * 60 * 1000); // 2 días atrás
+        const thresholdDate = new Date(currentDate - 2 * 24 * 60 * 60 * 1000);
 
-        // Obtener los correos electrónicos de los usuarios que serán eliminados antes de eliminarlos.
-        const usersToBeDeleted = await getUsersToBeDeleted(thresholdDate);
+        const deletedCount = await UserService.deleteInactiveUsers(thresholdDate);
+        res.json({ message: `Eliminados ${deletedCount} usuarios por inactividad.` });
 
-        const deletedUsers = await deleteUsersByLastLogin(thresholdDate);
-
-        // Enviar correos electrónicos a los usuarios eliminados.
-        for (let user of usersToBeDeleted) {
-            await sendEmail(user.email, 'Cuenta eliminada', 'Tu cuenta fue eliminada por inactividad.');
-        }
-
-        res.json({ message: `Eliminados ${deletedUsers.deletedCount} usuarios por inactividad.` });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -81,14 +70,7 @@ userRouter.delete('/deleteusers', authenticate, async (req, res) => {
 
 userRouter.delete('/:userId', authenticate, isAdmin, async (req, res) => {
     try {
-        const userId = req.params.userId;
-        const user = await deleteUserById(userId);
-        
-        if (!user) {
-            res.status(404).json({ message: "Usuario no encontrado" });
-            return;
-        }
-        
+        await UserService.deleteUser(req.params.userId);
         res.json({ message: "Usuario eliminado con éxito" });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -97,22 +79,17 @@ userRouter.delete('/:userId', authenticate, isAdmin, async (req, res) => {
 
 userRouter.put('/:userId/role', authenticate, isAdmin, async (req, res) => {
     try {
-        const userId = req.params.userId;
-        const updatedRole = await flipRole(userId);
+        const updatedRole = await UserService.changeUserRole(req.params.userId);
         res.json({ message: `Rol del usuario cambiado a ${updatedRole}` });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
 
-
 userRouter.get('/adminId', async (req, res) => {
     try {
-        const admin = await User.findOne({ role: 'admin' }); // Busca el primer administrador en la base de datos
-        if (!admin) {
-            return res.status(404).json({ message: 'Administrador no encontrado.' });
-        }
-        res.status(200).json({ adminId: admin._id });
+        const adminId = await UserService.getAdminId();
+        res.status(200).json({ adminId });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

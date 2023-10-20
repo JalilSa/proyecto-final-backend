@@ -47,3 +47,6 @@ export const getUsersToBeDeleted = async (thresholdDate) => {
     return await UserModel.find({ lastLogin: { $lt: thresholdDate } });
 };
 
+export const findUserById = async (userId) => {
+    return await UserModel.findById(userId);
+};
