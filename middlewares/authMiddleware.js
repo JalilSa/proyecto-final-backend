@@ -11,7 +11,6 @@ export const authenticate = (req, res, next) => {
     const token = authHeader.split(' ')[1];
     const decodedToken = TokenService.verifyToken(token);
     req.user = decodedToken; 
-    console.log("Token decodificado:", decodedToken);
     
 
     if (!decodedToken) {

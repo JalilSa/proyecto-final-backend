@@ -1,6 +1,6 @@
 import express from 'express';
 import ProductDAO from '../mongo/DAO/productDAO.js';
-import {authenticate} from "../middlewares/authMiddleware.js"
+import {authenticate, isAdmin} from "../middlewares/authMiddleware.js"
 const productRouter = express.Router();
 const productDAO = new ProductDAO();
 
@@ -64,7 +64,7 @@ productRouter.put('/api/products/:id', async (req, res) => {
     }
 });
 
-productRouter.delete('/api/products/:id', async (req, res) => {
+productRouter.delete('/api/products/:id', authenticate, isAdmin, async (req, res) => {
     try {
         await productDAO.deleteProduct(req.params.id);
         res.json({ message: 'Producto eliminado correctamente.' });
