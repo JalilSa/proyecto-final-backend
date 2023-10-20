@@ -40,14 +40,18 @@ export const deleteInactiveUsers = async (thresholdDate) => {
     const deletedUsers = await UserDAO.deleteUsersByLastLogin(thresholdDate);
     
     for (let user of usersToBeDeleted) {
-        await sendEmail(user.email, 'Cuenta eliminada', 'Tu cuenta fue eliminada por inactividad.');
+        try {
+            await sendEmail(user.email, 'Cuenta eliminada', 'Tu cuenta fue eliminada por inactividad.');
+        } catch (error) {
+            console.log(`El user ${user.name} fue eliminado sin enviar el mail de aviso. Error: ${error.message}`);
+        }
     }
 
     return deletedUsers.deletedCount;
 };
 
 export const deleteUser = async (userId) => {
-    const user = await UserDAO.findUserById(userId);  // Aquí es donde hicimos la corrección.
+    const user = await UserDAO.findUserById(userId);  
 
     if (!user) throw new Error("Usuario no encontrado");
     if (user.role === 'admin') throw new Error("No se puede eliminar el usuario admin");

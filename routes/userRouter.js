@@ -53,10 +53,11 @@ userRouter.get('/getusers', authenticate, isAdmin, async (req, res) => {
 
 
 
-userRouter.delete('/deleteusers', authenticate, async (req, res) => {
+userRouter.delete('/deleteusers', authenticate, isAdmin, async (req, res) => {
     try {
         const currentDate = new Date();
         const thresholdDate = new Date(currentDate - 2 * 24 * 60 * 60 * 1000);
+        console.log("Fecha umbral para eliminar usuarios:", thresholdDate);
 
         const deletedCount = await UserService.deleteInactiveUsers(thresholdDate);
         res.json({ message: `Eliminados ${deletedCount} usuarios por inactividad.` });
